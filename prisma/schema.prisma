@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum FollowStatus {
+  PENDING
+  ACCEPTED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String?
+  avatarUrl String?
+  avatarPublicId String?
+  coverUrl       String?
+  coverPublicId  String?
+
+  bio       String?
+  createdAt DateTime @default(now())
+
+  posts     Post[]
+  comments  Comment[]
+  likes     Like[]
+  following Follow[]  @relation("Follower")  // pedidos que eu fiz
+  followers Follow[]  @relation("Following") // pedidos que recebi
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  content   String?
+  createdAt DateTime @default(now())
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  images    PostImage[]
+  comments  Comment[]
+  likes     Like[]
+}
+
+model PostImage {
+  id       Int     @id @default(autoincrement())
+  url      String
+  publicId String?
+  position Int     @default(0)
+  postId   Int
+  post     Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  authorId  Int
+  postId    Int
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  postId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+model Follow {
+  id          Int          @id @default(autoincrement())
+  status      FollowStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  followerId  Int
+  followingId Int
+  follower    User         @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User         @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+}
