@@ -42,3 +42,5 @@ passport.deserializeUser(async (id: number, done)=>{
 		done(error);
 	}
 })
+
+export { passport }
