@@ -3,6 +3,7 @@ import { passport } from "../config/passport.js";
 import { ensureAuth } from "../middleware/ensureAuth.js";
 import registerValidator from "../middleware/registerValidator.js";
 import { validationResult } from "express-validator";
+import loginValidator from "../middleware/loginValidator.js";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
 import type { Request, Response, NextFunction } from "express";
@@ -10,8 +11,16 @@ import type { Request, Response, NextFunction } from "express";
 const authRouter = Router();
 
 // POST /api/auth/login
-authRouter.post('/login',
-	passport.authenticate('local'), (req, res) => {
+authRouter.post('/login', loginValidator, (req: Request, res: Response, next: NextFunction) => {
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		return res.status(400).json({
+			errors: errors.array()
+		});
+	}
+	next();
+},
+	passport.authenticate('local'), (req: Request, res: Response) => {
 		res.json({ user: req.user });
 	}
 );
@@ -64,7 +73,6 @@ authRouter.post('/register', registerValidator, async (req: Request, res: Respon
 		}
 		next(error);
 	}
-}
-);
+});
 
 export default authRouter;
