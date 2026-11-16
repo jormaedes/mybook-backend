@@ -9,7 +9,7 @@ const isProd = process.env.NODE_ENV === "production";
 const app = express();
 
 app.use(cors({
-  origin: '*',
+  origin: process.env.CLIENT_URL,
   credentials: true
 }));
 
