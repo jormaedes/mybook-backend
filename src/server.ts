@@ -46,7 +46,7 @@ const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
       message: 'Email ou password incorretos'
     });
   }
-  
+
   res.status(500).json({ error: "Erro interno do servidor." });
 };
 
