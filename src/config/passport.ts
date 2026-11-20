@@ -3,7 +3,7 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import bcript from 'bcryptjs';
 import { prisma } from '../lib/prisma.js'
 
-const INVALID = "Email ou Password inválidos."
+const INVALID = { message: "Email ou Password inválidos." };
 
 passport.use(
 	new LocalStrategy(
@@ -13,7 +13,7 @@ passport.use(
 				const user = await prisma.user.findUnique({ where: { email: email } });
 				if (!user || !user.password) return done(null, false, INVALID);
 
-				const ok = bcript.compare(password, user.password);
+				const ok = await bcript.compare(password, user.password);
 
 				if (!ok) return done(null, false, INVALID);
 

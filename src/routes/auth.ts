@@ -52,7 +52,8 @@ authRouter.post('/register', registerValidator, async (req: Request, res: Respon
 
 	const { username, email, password } = req.body;
 	try {
-		const hash = await bcrypt.hash(password, Number(process.env.PASSWORD_HASH_NUMBER));
+		const saltRounds = Number(process.env.PASSWORD_HASH_NUMBER) || 10;
+		const hash = await bcrypt.hash(password, saltRounds);
 		const user = await prisma.user.create({
 			data: {
 				username: username,
@@ -62,7 +63,7 @@ authRouter.post('/register', registerValidator, async (req: Request, res: Respon
 			omit: { password: true }
 		});
 		req.login(user, (err) => {
-			if (err) next(err);
+			if (err) return next(err);
 			return res.status(201).json({ user });
 		});
 	} catch (error) {
