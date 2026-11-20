@@ -34,22 +34,23 @@ async function main() {
 
     const passwordHash = await bcrypt.hash(PASSWORD, 10);
 
-    // 2. Utilizadores (o primeiro é um utilizador "demo" para login rápido)
+    // 2. Utilizadores (o primeiro é o utilizador "guest" para demonstração/login rápido)
     const users = [];
     for (let i = 0; i < USER_COUNT; i++) {
-        const isDemo = i === 0;
+        const isGuest = i === 0;
         const first = faker.person.firstName().toLowerCase();
         const last = faker.person.lastName().toLowerCase();
-        const username = isDemo ? "demo" : `${first}.${last}${i}`;
+        const username = isGuest ? "guest" : `${first}.${last}${i}`;
 
         users.push(
             await prisma.user.create({
                 data: {
                     username,
-                    email: isDemo ? "demo@odinbook.dev" : `${username}@example.com`,
+                    email: isGuest ? "guest@odinbook.dev" : `${username}@example.com`,
                     password: passwordHash,
-                    bio: faker.lorem.sentence(),
-                    avatarUrl: faker.image.avatar(),
+                    isGuest,
+                    bio: isGuest ? "Conta de demonstração para convidados." : faker.lorem.sentence(),
+                    avatarUrl: isGuest ? "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" : faker.image.avatar(),
                     coverUrl: randomImage(1200, 400),
                     // avatarPublicId / coverPublicId ficam null: não existem no Cloudinary
                 },
@@ -140,15 +141,15 @@ async function main() {
         follows.push({ followerId, followingId, status });
     };
 
-    const demo = users[0];
+    const guest = users[0];
 
-    // O demo segue 5 pessoas (aceites), para o feed ter conteúdo
+    // O guest segue 5 pessoas (aceites), para o feed ter conteúdo
     for (const other of faker.helpers.arrayElements(users.slice(1), 5)) {
-        addFollow(demo.id, other.id, "ACCEPTED");
+        addFollow(guest.id, other.id, "ACCEPTED");
     }
-    // Alguns pedidos pendentes a chegar ao demo, para testares aceitar/recusar
+    // Alguns pedidos pendentes a chegar ao guest, para testares aceitar/recusar
     for (const other of faker.helpers.arrayElements(users.slice(1), 3)) {
-        addFollow(other.id, demo.id, "PENDING");
+        addFollow(other.id, guest.id, "PENDING");
     }
     // Os restantes seguem pessoas ao acaso
     for (const user of users.slice(1)) {
@@ -173,7 +174,7 @@ async function main() {
     console.log(`  comentários:  ${commentTotal}`);
     console.log(`  likes:        ${likeTotal}`);
     console.log(`  follows:      ${follows.length}`);
-    console.log(`Login de teste: demo@odinbook.dev / ${PASSWORD}`);
+    console.log(`Login de teste Convidado: guest@odinbook.dev / ${PASSWORD} (ou via botão Convidado)`);
 }
 
 main()

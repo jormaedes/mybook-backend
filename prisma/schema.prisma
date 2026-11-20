@@ -27,6 +27,7 @@ model User {
   coverUrl       String?
   coverPublicId  String?
   githubId String? @unique
+  isGuest   Boolean  @default(false)
 
   bio       String?
   createdAt DateTime @default(now())
