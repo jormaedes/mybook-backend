@@ -10,6 +10,27 @@ import type { Request, Response, NextFunction } from "express";
 
 const authRouter = Router();
 
+const CLIENT_URL = process.env.CLIENT_URL ?? "http://localhost:3000";
+
+// Inicia o fluxo: redireciona o browser para o GitHub
+// /api/auth/github
+authRouter.get(
+  "/github",
+  passport.authenticate("github", { scope: ["user:email"] })
+);
+
+// O GitHub volta aqui com o código
+// /api/auth/github/callback
+authRouter.get(
+  "/github/callback",
+  passport.authenticate("github", {
+    failureRedirect: `${CLIENT_URL}/login?error=github`,
+  }),
+  (_req, res) => {
+    res.redirect(CLIENT_URL); // sessão já aberta; o frontend chama /me
+  }
+);
+
 // POST /api/auth/login
 authRouter.post('/login', loginValidator, (req: Request, res: Response, next: NextFunction) => {
 	const errors = validationResult(req);
