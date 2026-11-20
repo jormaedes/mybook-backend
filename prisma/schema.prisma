@@ -26,6 +26,7 @@ model User {
   avatarPublicId String?
   coverUrl       String?
   coverPublicId  String?
+  githubId String? @unique
 
   bio       String?
   createdAt DateTime @default(now())
